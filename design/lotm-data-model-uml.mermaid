@@ -1,5 +1,8 @@
 classDiagram
-    %% Base Class
+    %% ============================================
+    %% MODULE: People
+    %% ============================================
+    
     class Person {
         +id: int
         +first_name: string
@@ -22,22 +25,30 @@ classDiagram
         +created_at: date
     }
     
-    %% Core Entities
-    class Event {
+    class InstructorAssignment {
         +id: int
-        +title: string
-        +description: richtext
-        +event_date: date
-        +start_time: time
-        +end_time: time
-        +capacity: int
-        +available_slots: int
-        +registration_type: enum
-        +status: enum
-        +walk_in_count: int
-        +page_views: int
-        +register_clicks: int
+        +role: enum
+        +employment_type: enum
+        +hourly_rate: decimal
+        +is_volunteer: boolean
+        +confirmed: boolean
+        +hours_worked: decimal
     }
+    
+    class InstructorEvaluation {
+        +id: int
+        +technical_skills: int
+        +teaching_ability: int
+        +reliability: int
+        +student_engagement: int
+        +notes: text
+        +potential_hire: boolean
+        +created_at: date
+    }
+    
+    %% ============================================
+    %% MODULE: Place
+    %% ============================================
     
     class Metro {
         +id: int
@@ -65,15 +76,22 @@ classDiagram
         +contact_email: string
         +can_deliver_events: boolean
         +can_host_events: boolean
+        +is_funder: boolean
     }
     
-    class Campaign {
+    class Commitment {
         +id: int
-        +name: string
-        +start_date: date
-        +end_date: date
-        +utm_campaign: string
-        +total_reach: int
+        +commitment_type: enum
+        +dollar_amount: decimal (nullable)
+        +event_count: int (nullable)
+        +committed_date: date
+        +start_date: date (nullable)
+        +end_date: date (nullable)
+        +status: enum
+        +notes: text
+        +current_balance: decimal
+        +events_delivered: int
+        +events_remaining: int
     }
     
     class Flyer {
@@ -83,6 +101,57 @@ classDiagram
         +distribution_count: int
         +design_file: media
         +utm_source: string
+        +utm_campaign: string
+        +total_reach: int
+    }
+    
+    class JobPosting {
+        +id: int
+        +title: string
+        +description: richtext
+        +hourly_rate: string
+        +hours_per_week: string
+        +requirements: text
+        +status: enum
+        +posted_date: date
+    }
+    
+    %% ============================================
+    %% MODULE: Event
+    %% ============================================
+    
+    class Event {
+        +id: int
+        +title: string
+        +description: richtext
+        +event_date: date (nullable)
+        +start_time: time (nullable)
+        +end_time: time (nullable)
+        +capacity: int
+        +available_slots: int
+        +registration_type: enum
+        +status: enum
+        +proposal_state: enum
+        +walk_in_count: int
+        +page_views: int
+        +register_clicks: int
+        +is_tbd: boolean
+        +proposed_by_funder: boolean
+        +event_cost: decimal
+    }
+    
+    class EventPrototype {
+        +id: int
+        +name: string
+        +title: string
+        +description: richtext
+        +duration_minutes: int
+        +default_capacity: int
+        +topic: string
+        +age_range: string
+        +suggested_venue_name: string
+        +suggested_metro_name: string
+        +instructions: text
     }
     
     class Tag {
@@ -91,7 +160,6 @@ classDiagram
         +slug: string
     }
     
-    %% Registration Structure
     class Registration {
         +id: int
         +registration_source: enum
@@ -110,73 +178,45 @@ classDiagram
         +notes: text
     }
     
-    %% Association Entities
-    class InstructorAssignment {
-        +id: int
-        +role: enum
-        +employment_type: enum
-        +hourly_rate: decimal
-        +is_volunteer: boolean
-        +confirmed: boolean
-        +hours_worked: decimal
-    }
+    %% ============================================
+    %% RELATIONSHIPS
+    %% ============================================
     
-    class InstructorEvaluation {
-        +id: int
-        +technical_skills: int
-        +teaching_ability: int
-        +reliability: int
-        +student_engagement: int
-        +notes: text
-        +potential_hire: boolean
-        +created_at: date
-    }
-    
-    class JobPosting {
-        +id: int
-        +title: string
-        +description: richtext
-        +hourly_rate: string
-        +hours_per_week: string
-        +requirements: text
-        +status: enum
-        +posted_date: date
-    }
-    
-    %% One-to-Many Relationships
-    Metro "1" -- "0..*" Event : metro
+    %% Place Module Internal
     Metro "1" -- "0..*" Venue : metro
-    Metro "1" -- "0..*" Person : metro
     Metro "1" -- "0..*" Partner : metro
-    Venue "1" -- "0..*" Event : venue
-    Campaign "1" -- "0..*" Flyer : campaign
-    Event "1" -- "0..*" Registration : event
+    Partner "1" -- "0..*" JobPosting : partner
+    Metro "1" -- "0..*" JobPosting : metro
+    Partner "0..1" -- "0..*" Venue : partner
+    Partner "1" -- "0..*" Commitment : partner
     
-    %% Registration Relationships
+    %% Place to Event
+    Metro "1" -- "0..*" Event : metro
+    Venue "1" -- "0..*" Event : venue
+    Partner "0..1" -- "0..*" Event : partner
+    Partner "0..1" -- "0..*" Event : funder
+    Flyer "0..*" -- "0..*" Event : flyer_event
+    
+    %% Place to People
+    Metro "1" -- "0..*" Person : metro
+    
+    %% Event Module Internal
+    EventPrototype "0..1" -- "0..*" Event : prototype
+    Event "1" -- "0..*" Registration : event
+    Event "0..*" -- "0..*" Tag : event_tag
+    
+    %% Event to People Registration
     Person "1" -- "0..*" Registration : registrant
     Registration "1" -- "0..*" RSVP : registration
-    
-    %% RSVP Relationships
     Event "1" -- "0..*" RSVP : event
     Person "1" -- "0..*" RSVP : attendee
     Person "0..1" -- "0..*" RSVP : guardian
     
-    %% Many-to-Many Relationships
-    Event "0..*" -- "0..*" Tag : event_tag
-    Campaign "0..*" -- "0..*" Event : campaign_event
-    Flyer "0..*" -- "0..*" Event : flyer_event
-    
-    %% Instructor Assignment Relationships
+    %% People to Event Instruction
     Event "1" -- "0..*" InstructorAssignment : event
     Person "1" -- "0..*" InstructorAssignment : instructor
     Partner "0..1" -- "0..*" InstructorAssignment : employer
     
-    %% Evaluation Relationships
+    %% People Module Internal
     InstructorAssignment "1" -- "0..*" InstructorEvaluation : instructor_assignment
     Person "1" -- "0..*" InstructorEvaluation : evaluator
-    
-    %% Optional Relationships
-    Partner "0..1" -- "0..*" Event : partner
-    Partner "0..1" -- "0..*" Venue : partner
-    Partner "1" -- "0..*" JobPosting : partner
-    Metro "1" -- "0..*" JobPosting : metro

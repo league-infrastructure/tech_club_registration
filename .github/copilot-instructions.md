@@ -2,7 +2,10 @@
 
 ## Project Overview
 
-This is a **Next.js 15 + Supabase** application for managing tech club event registrations. The project follows a **multi-metro, multi-venue event system** with comprehensive person/registration tracking, designed for the League of Amazing Programmers infrastructure.
+This is a **Next.js 15 + Supabase** application for managing tech club event 
+registrations. The project follows a **multi-metro, multi-venue event system** with 
+comprehensive person/registration tracking, designed for the League of 
+Amazing Programmers infrastructure.
 
 ## Critical Architecture Knowledge
 
@@ -79,3 +82,5 @@ When working on this codebase:
 3. **Follow the established Supabase client pattern** in `src/lib/supabase.ts`
 4. **Check `docs/setup.md`** for database schema and setup procedures
 5. **Consider multi-metro context** when building features (metro-scoped data)
+
+In design documents, comments for AI agents are in square brackets, \[\]. 
